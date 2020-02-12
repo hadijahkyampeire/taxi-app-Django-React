@@ -15,6 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.conf import settings
+from django.conf.urls.static import static
 
 from rest_framework_simplejwt.views import TokenRefreshView
 from trips.views import SignUpView, LogInView
@@ -26,4 +28,4 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(),
          name='token_refresh'),
     path('api/trip/', include('trips.urls', 'trip',)),
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
