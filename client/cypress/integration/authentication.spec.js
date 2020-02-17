@@ -1,51 +1,9 @@
-const logIn = () => {
-  const { username, password } = Cypress.env('credentials');
 
-  // Capture HTTP requests.
-  cy.server();
-  cy.route({
-    method: 'POST',
-    url: '**/api/log_in/**',
-    status: 200,
-    response: {
-      access: 'ACCESS_TOKEN',
-      refresh: 'REFRESH_TOKEN'
-    }
-  }).as('logIn');
-
-  // Log into the app.
-  cy.visit('/log-in');
-  cy.get('input#username').type(username);
-  cy.get('input#password').type(password, { log: false });
-  cy.get('button')
-    .contains('Log in')
-    .click();
-  cy.wait('@logIn');
-};
 
 describe('Authentication', function() {
-  it('Can log in.', function() {
-    logIn();
-    cy.url().should('contain', '/');
-
-    cy.get('button').contains('Log out');
-  });
-
   it('Can sign up.', function() {
     cy.server();
-  cy.route({
-    method: 'POST',
-    url: '**/api/sign_up/**',
-    status: 201,
-    response: {
-      'id': 1,
-      'username': 'hadijah.kyamps@example.com',
-      'first_name': 'Hadijah',
-      'last_name': 'Kyamps',
-      'group': 'driver',
-      'photo': '/media/images/photo.png'
-    }
-  }).as('signUp');
+    cy.route('POST', '**/api/sign_up/**').as('signUp');
 
     cy.visit('/sign-up');
     cy.get('input#username').type('hadijah.kyamps@example.com');
@@ -74,6 +32,32 @@ describe('Authentication', function() {
     cy.wait('@signUp');
     cy.url().should('include', '/log-in');
   });
+
+  const logIn = () => {
+    const { username, password } = Cypress.env('credentials');
+  
+    // Capture HTTP requests.
+    cy.server();
+    cy.route('POST','**/api/log_in/**').as('logIn');
+  
+    // Log into the app.
+    cy.visit('/log-in');
+    cy.get('input#username').type(username);
+    cy.get('input#password').type(password, { log: false });
+    cy.get('button')
+      .contains('Log in')
+      .click();
+    cy.wait('@logIn');
+  };
+
+  it('Can log in.', function() {
+    logIn();
+    cy.url().should('contain', '/');
+
+    cy.get('button').contains('Log out');
+  });
+
+  
 
   it('Cannot visit the login page when logged in.', function() {
     logIn();
